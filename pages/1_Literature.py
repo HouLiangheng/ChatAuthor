@@ -264,12 +264,45 @@ with col1:
                             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
                         })
                     else:
-                        # 如果是已发表作品，显示作品信息
-                        st.session_state.chat_history.append({
-                            "role": "assistant",
-                            "content": f"这是一段已发表的作品：\n\n{identification_result}",
-                            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
-                        })
+                    # 从已发表作品信息中提取作者信息
+                    analysis_prompt = f"""
+                    基于这个已发表作品的信息：
+                    {identification_result}
+
+                    请生成关于这位作者的详细信息，按以下结构组织：
+                    [WRITER_INFO]
+                    关于这位作家：
+                    - 基本信息和主要成就
+                    - 创作特点和代表作品
+                    - 写作风格特征
+                    - 思想内涵特点
+
+                    请用自然流畅的语言表述，避免生硬的条目式陈述。
+                    """
+
+                    analysis_response = client.chat.completions.create(
+                        model="gpt-4o",
+                        messages=[
+                            {"role": "system", "content": analysis_prompt},
+                            {"role": "user", "content": text_input}
+                        ]
+                    )
+                    analysis_result = analysis_response.choices[0].message.content
+
+                    # 提取作家信息
+                    parts = analysis_result.split("[WRITER_INFO]")
+                    writer_info = parts[1].strip() if len(parts) > 1 else ""
+
+                    # 保存作家信息并设置分析完成状态
+                    st.session_state.writer_info = writer_info
+                    st.session_state.analysis_done = True
+
+                    # 添加分析结果到对话
+                    st.session_state.chat_history.append({
+                        "role": "assistant",
+                        "content": f"这是一段已发表的作品：\n\n{identification_result}\n\n现在你可以开始与这位作家对话了。",
+                        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
+                    })
 
                 st.rerun()
         else:
