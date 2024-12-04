@@ -11,3 +11,22 @@ client = AzureOpenAI(
 def read_prompt(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
         return file.read()
+    
+def call_openai(messages, temperature=None):
+    try:
+        if temperature is None:
+            response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=messages
+            )
+        else:
+            response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=messages,
+                temperature=temperature
+            )
+
+        return response.choices[0].message.content
+    except Exception as e:
+        st.error(f"Error calling OpenAI API: {e}")
+        return ""
