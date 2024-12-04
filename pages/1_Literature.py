@@ -3,8 +3,6 @@ from pages.toolbox import client, read_prompt
 import time
 
 identification_prompt = read_prompt('pages/prompt/existing_writing.txt')
-analysis_prompt = read_prompt('pages/prompt/writing_style.txt')
-analysis_prompt = read_prompt('pages/prompt/writer_info.txt')
 writer_prompt = read_prompt('pages/prompt/cosplay.txt')
 
 # 设置页面配置
@@ -135,6 +133,7 @@ with col1:
                         
                         # 请用自然流畅的语言表述，避免生硬的条目式陈述。
                         # """
+                        analysis_prompt = read_prompt('pages/prompt/writing_style.txt')
 
                         analysis_response = client.chat.completions.create(
                             model="gpt-4o",
@@ -175,7 +174,8 @@ with col1:
     
                         # 请用自然流畅的语言表述，避免生硬的条目式陈述。
                         # """
-
+                        analysis_prompt = read_prompt('pages/prompt/writer_info.txt')
+                        
                         analysis_response = client.chat.completions.create(
                             model="gpt-4o",
                             messages=[
