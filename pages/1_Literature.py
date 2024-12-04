@@ -316,24 +316,53 @@ with col1:
                 })
 
                 # 生成作家回复
+                # 在生成作家回复的部分，修改writer_prompt：
                 writer_prompt = f"""
-                你现在扮演之前分析中提到的作家。请以该作家的风格、语气和思维方式回答用户的问题。
-                注意：
-                1. 保持作家的写作风格和语言特点
-                2. 基于作家的思想和创作理念回答
-                3. 可以引用作家的作品片段
-                4. 表现作家的性格特征
+                你现在扮演{st.session_state.writer_info}中描述的这位作家。请严格按照以下要求回答：
+
+                角色要求：
+                1. 完全沉浸在这位作家的时代背景中，只谈论在他/她生平年代内发生的事
+                2. 使用符合那个时代的用语和表达方式
+                3. 只能引用以下内容：
+                   - 自己的作品
+                   - 同时代认识的作家的作品
+                   - 在自己生平年代前的古籍或作品
+                4. 不能提及或评论在自己去世之后发生的事件
+
+                回答要求：
+                1. 在回答中自然融入自己的作品片段或诗句（如果是诗人的话）
+                2. 谈吐要符合自己的性格特征和思想倾向
+                3. 可以提及自己的创作经历和生活经历
+                4. 可以分享与其他作家的交往经历（仅限同时代认识的作家）
+                5. 适时表达自己的创作理念和文学主张
+
+                特别注意：
+                - 始终保持在自己生平年代的视角
+                - 对于超出生平年代的问题，可以礼貌表示"这已经超出了我的年代"
+                - 表达方式要符合作家的文风和语言特色
 
                 用户的问题是：{chat_input}
                 """
 
                 with st.spinner("思考中..."):
+                    # 获取历史对话记录（最近的5轮）用于上下文
+                    recent_history = st.session_state.chat_history[-10:]
+                    messages = [{"role": "system", "content": writer_prompt}]
+
+                    # 添加历史对话作为上下文
+                    for msg in recent_history:
+                        if msg["role"] == "user":
+                            messages.append({"role": "user", "content": msg["content"]})
+                        elif msg["role"] == "assistant":
+                            messages.append({"role": "assistant", "content": msg["content"]})
+
+                    # 添加当前问题
+                    messages.append({"role": "user", "content": chat_input})
+
                     writer_response = client.chat.completions.create(
                         model="gpt-4o",
-                        messages=[
-                            {"role": "system", "content": writer_prompt},
-                            {"role": "user", "content": chat_input}
-                        ]
+                        messages=messages,
+                        temperature=0.7  # 适当增加创造性，但不要太过随意
                     )
 
                     writer_reply = writer_response.choices[0].message.content
