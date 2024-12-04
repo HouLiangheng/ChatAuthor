@@ -5,9 +5,21 @@ import time
 # 设置页面配置
 st.set_page_config(page_title="文字分析与作家对话", layout="wide")
 
-# 自定义CSS样式
+
 st.markdown("""
 <style>
+    /* 移除默认的空白区域 */
+    .block-container {
+        padding-top: 1rem !important;
+        padding-bottom: 0rem !important;
+    }
+
+    /* 移除标题下方的默认边距 */
+    .stTitle {
+        margin-bottom: 0 !important;
+    }
+
+    /* 聊天气泡样式 */
     .user-bubble {
         background-color: #95EC69;
         padding: 10px 15px;
@@ -17,6 +29,7 @@ st.markdown("""
         float: right;
         clear: both;
     }
+
     .assistant-bubble {
         background-color: white;
         padding: 10px 15px;
@@ -26,14 +39,19 @@ st.markdown("""
         float: left;
         clear: both;
     }
+
+    /* 聊天容器样式 */
     .chat-container {
         background-color: #F0F2F5;
         padding: 20px;
         border-radius: 10px;
-        margin-bottom: 20px;
-        height: 500px;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+        height: calc(100vh - 280px);
         overflow-y: auto;
     }
+
+    /* 时间戳样式 */
     .timestamp {
         color: #999;
         font-size: 12px;
@@ -41,13 +59,38 @@ st.markdown("""
         margin: 10px 0;
         clear: both;
     }
+
+    /* 清除浮动 */
     .clearfix {
         clear: both;
         display: block;
         content: "";
     }
+
+    /* 作家信息卡片样式 */
     .writer-info {
         background-color: #ffffff;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    /* 输入区域样式 */
+    .stTextArea textarea {
+        border-radius: 10px;
+    }
+
+    /* 按钮样式 */
+    .stButton button {
+        border-radius: 20px;
+        background-color: #07C160;
+        color: white;
+    }
+
+    /* 自定义功能说明区域样式 */
+    .function-desc {
+        background-color: #F7F7F7;
         padding: 15px;
         border-radius: 10px;
         margin-bottom: 15px;
@@ -243,4 +286,3 @@ with col1:
                     })
 
                 st.rerun()
-                
