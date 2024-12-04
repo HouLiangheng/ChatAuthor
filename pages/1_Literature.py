@@ -206,7 +206,7 @@ with col1:
                     """
 
                     identification_response = client.chat.completions.create(
-                        model="gpt-4o-2024-11-20",
+                        model="gpt-4o",
                         messages=[
                             {"role": "system", "content": identification_prompt},
                             {"role": "user", "content": text_input}
@@ -241,7 +241,7 @@ with col1:
                         """
 
                         analysis_response = client.chat.completions.create(
-                            model="gpt-4o-2024-11-20",
+                            model="gpt-4o",
                             messages=[
                                 {"role": "system", "content": analysis_prompt},
                                 {"role": "user", "content": text_input}
@@ -298,7 +298,7 @@ with col1:
 
                 with st.spinner("思考中..."):
                     writer_response = client.chat.completions.create(
-                        model="gpt-4o-2024-11-20",
+                        model="gpt-4o",
                         messages=[
                             {"role": "system", "content": writer_prompt},
                             {"role": "user", "content": chat_input}
