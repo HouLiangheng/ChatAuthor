@@ -41,6 +41,20 @@ if "writer_info" not in st.session_state:
 if "analysis_done" not in st.session_state:
     st.session_state.analysis_done = False
 
+if "text_input" not in st.session_state:
+    st.session_state.text_input = ""
+
+if "chat_input" not in st.session_state:
+    st.session_state.chat_input = ""
+
+def clear_text_input():
+    st.session_state.text_input = st.session_state.text
+    st.session_state.text = ""
+
+def clear_chat_input():
+    st.session_state.chat_input = st.session_state.chat
+    st.session_state.chat = ""
+
 # 创建两列布局
 col1, col2 = st.columns([7, 3])
 
@@ -68,7 +82,8 @@ with col1:
     # 输入区域
     with st.container():
         if not st.session_state.analysis_done:
-            text_input = st.text_area("输入文字", key="text_input", height=100)
+            st.text_area("输入文字", key="text", height=100, on_change=clear_text_input)
+            text_input = st.session_state.text_input
             analyze_button = st.button("分析", use_container_width=True)
             
             if text_input and analyze_button:
@@ -78,6 +93,7 @@ with col1:
                     "content": text_input,
                     "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
                 })
+                
 
                 with st.spinner("分析中..."):
                     # 步骤1：判断是否是已发表作品
@@ -151,8 +167,8 @@ with col1:
                 st.rerun()
         else:
             # 与作家对话模式
-            chat_input = st.text_input("与作家对话", key="chat_input")
-
+            st.text_input("与作家对话", key="chat", on_change=clear_chat_input)
+            chat_input = st.session_state.chat_input
             if st.button("发送", use_container_width=True) and chat_input:
                 # 添加用户输入到历史记录
                 st.session_state.chat_history.append({
