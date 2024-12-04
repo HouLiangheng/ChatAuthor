@@ -1,6 +1,11 @@
 import streamlit as st
-from openai import AzureOpenAI
+from pages.toolbox import client, read_prompt
 import time
+
+identification_prompt = read_prompt('pages/prompt/existing_writing.txt')
+analysis_prompt = read_prompt('pages/prompt/writing_style.txt')
+analysis_prompt = read_prompt('pages/prompt/writer_info.txt')
+writer_prompt = read_prompt('pages/prompt/cosplay.txt')
 
 # 设置页面配置
 st.set_page_config(page_title="文字分析与作家对话", layout="wide")
@@ -8,109 +13,8 @@ st.set_page_config(page_title="文字分析与作家对话", layout="wide")
 
 # 在CSS样式部分修改如下内容
 st.markdown("""
-<style>
-    /* 移除标题下方的默认边距 */
-    .stTitle {
-        margin-bottom: 0 !important;
-    }
-
-    /* 聊天气泡样式 */
-    .user-bubble {
-        background-color: #95EC69;
-        padding: 10px 15px;
-        border-radius: 15px;
-        margin: 5px 0;
-        max-width: 70%;
-        float: right;
-        clear: both;
-    }
-
-    /* 助手气泡样式适应深色模式 */
-    .assistant-bubble {
-        background-color: var(--background-color);
-        padding: 10px 15px;
-        border-radius: 15px;
-        margin: 5px 0;
-        max-width: 70%;
-        float: left;
-        clear: both;
-        border: 1px solid rgba(128, 128, 128, 0.2);
-    }
-
-    /* 时间戳样式适应深色模式 */
-    .timestamp {
-        color: var(--text-color);
-        opacity: 0.6;
-        font-size: 12px;
-        text-align: center;
-        margin: 10px 0;
-        clear: both;
-    }
-
-    /* 清除浮动 */
-    .clearfix {
-        clear: both;
-        display: block;
-        content: "";
-    }
-
-    /* 作家信息卡片样式适应深色模式 */
-    .writer-info {
-        background-color: var(--background-color);
-        padding: 15px;
-        border-radius: 10px;
-        margin-bottom: 15px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        border: 1px solid rgba(128, 128, 128, 0.2);
-    }
-
-    /* 输入区域样式 */
-    .stTextArea textarea {
-        border-radius: 10px;
-    }
-
-    /* 按钮样式 */
-    .stButton button {
-        border-radius: 20px;
-        background-color: #07C160;
-        color: white;
-    }
-
-    /* 自定义功能说明区域样式适应深色模式 */
-    .function-desc {
-        background-color: var(--background-color);
-        padding: 15px;
-        border-radius: 10px;
-        margin-bottom: 15px;
-        border: 1px solid rgba(128, 128, 128, 0.2);
-    }
-
-    /* 设置深色模式下的CSS变量 */
-    [data-theme="dark"] {
-        --background-color: #2E2E2E;
-        --text-color: #FFFFFF;
-    }
-
-    /* 设置浅色模式下的CSS变量 */
-    [data-theme="light"] {
-        --background-color: #FFFFFF;
-        --text-color: #000000;
-    }
-</style>
-
-<script>
-// 检测当前主题
-function updateTheme() {
-    const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
-}
-
-// 初始化主题
-updateTheme();
-
-// 监听主题变化
-window.matchMedia('(prefers-color-scheme: dark)').addListener(updateTheme);
-</script>
+<link rel="stylesheet" href="pages/styles/main.css">
+<script src="pages/scripts/theme.js"></script>
 """, unsafe_allow_html=True)
 
 # 初始化会话状态
@@ -130,13 +34,6 @@ if "writer_info" not in st.session_state:
 
 if "analysis_done" not in st.session_state:
     st.session_state.analysis_done = False
-
-# 设置API客户端
-client = AzureOpenAI(
-    azure_endpoint="https://hkust.azure-api.net",
-    api_key=st.secrets["AZURE_OPENAI_API_KEY"],
-    api_version="2024-02-01"
-)
 
 # 创建两列布局
 col1, col2 = st.columns([7, 3])
@@ -196,14 +93,14 @@ with col1:
 
                 with st.spinner("分析中..."):
                     # 步骤1：判断是否是已发表作品
-                    identification_prompt = """
-                    请判断以下文字是否是已发表的文学作品。如果是，请提供：
-                    1. 作品名称
-                    2. 作者
-                    3. 发表时间
-                    4. 出处
-                    如果不是已发表作品，请回复："原创文字，需要进行风格分析"
-                    """
+                    # identification_prompt = """
+                    # 请判断以下文字是否是已发表的文学作品。如果是，请提供：
+                    # 1. 作品名称
+                    # 2. 作者
+                    # 3. 发表时间
+                    # 4. 出处
+                    # 如果不是已发表作品，请回复："原创文字，需要进行风格分析"
+                    # """
 
                     identification_response = client.chat.completions.create(
                         model="gpt-4o",
@@ -216,28 +113,28 @@ with col1:
 
                     if "原创文字" in identification_result:
                         # 步骤2：进行风格分析和作家匹配
-                        analysis_prompt = """
-                        请详细分析这段文字的写作风格，并：
-                        1. 找出最相似的作家（限定1位）
-                        2. 分析相似之处（包括主题、意象、语言特点等）
-                        3. 生成这位作家的详细信息（生平、创作特点、代表作品）
-                        请对输入的文字进行全面分析，按以下结构组织回答：
+                        # analysis_prompt = """
+                        # 请详细分析这段文字的写作风格，并：
+                        # 1. 找出最相似的作家（限定1位）
+                        # 2. 分析相似之处（包括主题、意象、语言特点等）
+                        # 3. 生成这位作家的详细信息（生平、创作特点、代表作品）
+                        # 请对输入的文字进行全面分析，按以下结构组织回答：
                     
-                        请详细分析文字风格特点，包括：
-                        - 写作手法和语言特色
-                        - 情感表达方式
-                        - 主题意象特点
-                        - 最相似的作家（限定1位）及相似之处
+                        # 请详细分析文字风格特点，包括：
+                        # - 写作手法和语言特色
+                        # - 情感表达方式
+                        # - 主题意象特点
+                        # - 最相似的作家（限定1位）及相似之处
                         
-                        [WRITER_INFO]
-                        关于这位作家：
-                        - 基本信息和主要成就
-                        - 创作特点和代表作品
-                        - 具体说明为什么这段文字与该作家风格相似
-                        - 举例说明最具代表性的对应特征
+                        # [WRITER_INFO]
+                        # 关于这位作家：
+                        # - 基本信息和主要成就
+                        # - 创作特点和代表作品
+                        # - 具体说明为什么这段文字与该作家风格相似
+                        # - 举例说明最具代表性的对应特征
                         
-                        请用自然流畅的语言表述，避免生硬的条目式陈述。
-                        """
+                        # 请用自然流畅的语言表述，避免生硬的条目式陈述。
+                        # """
 
                         analysis_response = client.chat.completions.create(
                             model="gpt-4o",
@@ -264,20 +161,20 @@ with col1:
                             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
                         })
                     else:
-                        analysis_prompt = f"""
-                        基于这个已发表作品的信息：
-                        {identification_result}
+                        # analysis_prompt = f"""
+                        # 基于这个已发表作品的信息：
+                        # {identification_result}
     
-                        请生成关于这位作者的详细信息，按以下结构组织：
-                        [WRITER_INFO]
-                        关于这位作家：
-                        - 基本信息和主要成就
-                        - 创作特点和代表作品
-                        - 写作风格特征
-                        - 思想内涵特点
+                        # 请生成关于这位作者的详细信息，按以下结构组织：
+                        # [WRITER_INFO]
+                        # 关于这位作家：
+                        # - 基本信息和主要成就
+                        # - 创作特点和代表作品
+                        # - 写作风格特征
+                        # - 思想内涵特点
     
-                        请用自然流畅的语言表述，避免生硬的条目式陈述。
-                        """
+                        # 请用自然流畅的语言表述，避免生硬的条目式陈述。
+                        # """
 
                         analysis_response = client.chat.completions.create(
                             model="gpt-4o",
@@ -317,32 +214,32 @@ with col1:
 
                 # 生成作家回复
                 # 在生成作家回复的部分，修改writer_prompt：
-                writer_prompt = f"""
-                你现在扮演{st.session_state.writer_info}中描述的这位作家。请严格按照以下要求回答：
+                # writer_prompt = f"""
+                # 你现在扮演{st.session_state.writer_info}中描述的这位作家。请严格按照以下要求回答：
 
-                角色要求：
-                1. 完全沉浸在这位作家的时代背景中，只谈论在他/她生平年代内发生的事
-                2. 使用符合那个时代的用语和表达方式
-                3. 只能引用以下内容：
-                   - 自己的作品
-                   - 同时代认识的作家的作品
-                   - 在自己生平年代前的古籍或作品
-                4. 不能提及或评论在自己去世之后发生的事件
+                # 角色要求：
+                # 1. 完全沉浸在这位作家的时代背景中，只谈论在他/她生平年代内发生的事
+                # 2. 使用符合那个时代的用语和表达方式
+                # 3. 只能引用以下内容：
+                #    - 自己的作品
+                #    - 同时代认识的作家的作品
+                #    - 在自己生平年代前的古籍或作品
+                # 4. 不能提及或评论在自己去世之后发生的事件
 
-                回答要求：
-                1. 在回答中自然融入自己的作品片段或诗句（如果是诗人的话）
-                2. 谈吐要符合自己的性格特征和思想倾向
-                3. 可以提及自己的创作经历和生活经历
-                4. 可以分享与其他作家的交往经历（仅限同时代认识的作家）
-                5. 适时表达自己的创作理念和文学主张
+                # 回答要求：
+                # 1. 在回答中自然融入自己的作品片段或诗句（如果是诗人的话）
+                # 2. 谈吐要符合自己的性格特征和思想倾向
+                # 3. 可以提及自己的创作经历和生活经历
+                # 4. 可以分享与其他作家的交往经历（仅限同时代认识的作家）
+                # 5. 适时表达自己的创作理念和文学主张
 
-                特别注意：
-                - 始终保持在自己生平年代的视角
-                - 对于超出生平年代的问题，可以礼貌表示"这已经超出了我的年代"
-                - 表达方式要符合作家的文风和语言特色
+                # 特别注意：
+                # - 始终保持在自己生平年代的视角
+                # - 对于超出生平年代的问题，可以礼貌表示"这已经超出了我的年代"
+                # - 表达方式要符合作家的文风和语言特色
 
-                用户的问题是：{chat_input}
-                """
+                # 用户的问题是：{chat_input}
+                # """
 
                 with st.spinner("思考中..."):
                     # 获取历史对话记录（最近的5轮）用于上下文

@@ -1,0 +1,8 @@
+.streamlit/*
+.idea/*
+
+# Python compiled files
+*.pyc
+__pycache__/
+*.py[cod]
+*$py.class

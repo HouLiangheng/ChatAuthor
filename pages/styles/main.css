@@ -1,0 +1,89 @@
+/* 移除标题下方的默认边距 */
+.stTitle {
+    margin-bottom: 0 !important;
+}
+
+/* 聊天气泡样式 */
+.user-bubble {
+    background-color: #95EC69;
+    padding: 10px 15px;
+    border-radius: 15px;
+    margin: 5px 0;
+    max-width: 70%;
+    float: right;
+    clear: both;
+}
+
+/* 助手气泡样式适应深色模式 */
+.assistant-bubble {
+    background-color: var(--background-color);
+    padding: 10px 15px;
+    border-radius: 15px;
+    margin: 5px 0;
+    max-width: 70%;
+    float: left;
+    clear: both;
+    border: 1px solid rgba(128, 128, 128, 0.2);
+}
+
+/* 时间戳样式适应深色模式 */
+.timestamp {
+    color: var(--text-color);
+    opacity: 0.6;
+    font-size: 12px;
+    text-align: center;
+    margin: 10px 0;
+    clear: both;
+}
+
+/* 清除浮动 */
+.clearfix {
+    clear: both;
+    display: block;
+    content: "";
+}
+
+/* 作家信息卡片样式适应深色模式 */
+.writer-info {
+    background-color: var(--background-color);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border: 1px solid rgba(128, 128, 128, 0.2);
+}
+
+/* 输入区域样式 */
+.stTextArea textarea {
+    border-radius: 10px;
+}
+
+/* 按钮样式 */
+.stButton button {
+    border-radius: 20px;
+    background-color: #07C160;
+    color: white;
+}
+
+/* 自定义功能说明区域样式适应深色模式 */
+.function-desc {
+    background-color: var(--background-color);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    border: 1px solid rgba(128, 128, 128, 0.2);
+}
+
+/* 设置深色模式下的CSS变量 */
+[data-theme="dark"] {
+    --background-color: #2E2E2E;
+    --text-color: #FFFFFF;
+}
+
+/* 设置浅色模式下的CSS变量 */
+[data-theme="light"] {
+    --background-color: #FFFFFF;
+    --text-color: #000000;
+}
+
+
