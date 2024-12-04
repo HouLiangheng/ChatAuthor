@@ -8,11 +8,21 @@ writer_prompt = read_prompt('pages/prompt/cosplay.txt')
 # 设置页面配置
 st.set_page_config(page_title="文字分析与作家对话", layout="wide")
 
-
 # 在CSS样式部分修改如下内容
-st.markdown("""
-<link rel="stylesheet" href="pages/styles/main.css">
-<script src="pages/scripts/theme.js"></script>
+with open('pages/styles/main.css', 'r', encoding='utf-8') as css_file:
+    css_content = css_file.read()
+
+with open('pages/scripts/theme.js', 'r', encoding='utf-8') as js_file:
+    js_content = js_file.read()
+
+st.markdown(f"""
+<style>
+{css_content}
+</style>
+
+<script>
+{js_content}
+</script>
 """, unsafe_allow_html=True)
 
 # 初始化会话状态

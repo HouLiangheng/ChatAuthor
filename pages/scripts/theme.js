@@ -8,4 +8,4 @@ function updateTheme() {
 updateTheme();
 
 // 监听主题变化
-window.matchMedia('(prefers-color-scheme: dark)').addListener(updateTheme);
+window.matchMedia('(prefers-color-scheme: dark)').addListener(updateTheme);  
