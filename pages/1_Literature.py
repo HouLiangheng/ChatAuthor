@@ -24,9 +24,9 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # 初始化会话状态
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = []
-    st.session_state.chat_history.append({
+if "literature_chat_history" not in st.session_state:
+    st.session_state.literature_chat_history = []
+    st.session_state.literature_chat_history.append({
         "role": "assistant",
         "content": "你好！请输入你的文字或喜欢的句子，我会帮你分析风格并匹配相似的作家。",
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
@@ -72,7 +72,7 @@ with col1:
     chat_container = st.container()
     with chat_container:
         st.markdown('<div class="chat-container">', unsafe_allow_html=True)
-        for message in st.session_state.chat_history:
+        for message in st.session_state.literature_chat_history:
             st.markdown(f'<div class="timestamp">{message["timestamp"]}</div>', unsafe_allow_html=True)
             bubble_class = "user-bubble" if message["role"] == "user" else "assistant-bubble"
             st.markdown(f'<div class="{bubble_class}">{message["content"]}</div>', unsafe_allow_html=True)
@@ -88,7 +88,7 @@ with col1:
             
             if text_input and analyze_button:
                 # 添加用户输入到历史记录
-                st.session_state.chat_history.append({
+                st.session_state.literature_chat_history.append({
                     "role": "user",
                     "content": text_input,
                     "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
@@ -107,7 +107,7 @@ with col1:
                     )
                     if identification_result == "":
                         # 让用户重新输入
-                        st.session_state.chat_history.append({
+                        st.session_state.literature_chat_history.append({
                             "role": "assistant",
                             "content": "你好！请输入你的文字或喜欢的句子，我会帮你分析风格并匹配相似的作家。",
                             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
@@ -134,7 +134,7 @@ with col1:
                             st.session_state.analysis_done = True
 
                             # 添加分析结果到对话
-                            st.session_state.chat_history.append({
+                            st.session_state.literature_chat_history.append({
                                 "role": "assistant",
                                 "content": analysis_text + "\n\n现在你可以开始与这位作家对话了。",
                                 "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
@@ -158,7 +158,7 @@ with col1:
                             st.session_state.analysis_done = True
 
                             # 添加分析结果到对话
-                            st.session_state.chat_history.append({
+                            st.session_state.literature_chat_history.append({
                                 "role": "assistant",
                                 "content": f"这是一段已发表的作品：\n\n{identification_result}\n\n现在你可以开始与这位作家对话了。",
                                 "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
@@ -171,7 +171,7 @@ with col1:
             chat_input = st.session_state.chat_input
             if st.button("发送", use_container_width=True) and chat_input:
                 # 添加用户输入到历史记录
-                st.session_state.chat_history.append({
+                st.session_state.literature_chat_history.append({
                     "role": "user",
                     "content": chat_input,
                     "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
@@ -183,7 +183,7 @@ with col1:
 
                 with st.spinner("思考中..."):
                     # 获取历史对话记录（最近的5轮）用于上下文
-                    recent_history = st.session_state.chat_history[-10:]
+                    recent_history = st.session_state.literature_chat_history[-10:]
                     messages = [{"role": "system", "content": writer_prompt}]
 
                     # 添加历史对话作为上下文
@@ -199,7 +199,7 @@ with col1:
                     writer_reply = call_openai(messages=messages, temperature=0.7)
 
                     # 添加作家回复到对话
-                    st.session_state.chat_history.append({
+                    st.session_state.literature_chat_history.append({
                         "role": "assistant",
                         "content": writer_reply,
                         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
@@ -208,7 +208,7 @@ with col1:
                 st.rerun()
 
             if st.button("清除对话记录", use_container_width=True):
-                st.session_state.chat_history = [{
+                st.session_state.literature_chat_history = [{
                     "role": "assistant",
                     "content": "你好！请输入你的文字或喜欢的句子，我会帮你分析风格并匹配相似的作家。",
                     "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")

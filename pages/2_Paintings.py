@@ -25,9 +25,9 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # 初始化会话状态
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = []
-    st.session_state.chat_history.append({
+if "paintings_chat_history" not in st.session_state:
+    st.session_state.paintings_chat_history = []
+    st.session_state.paintings_chat_history.append({
         "role": "assistant",
         "content": "你好！请上传一张图片，我会帮你分析画作风格并匹配相似的画家。",
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
@@ -58,7 +58,7 @@ with col1:
     chat_container = st.container()
     with chat_container:
         st.markdown('<div class="chat-container">', unsafe_allow_html=True)
-        for message in st.session_state.chat_history:
+        for message in st.session_state.paintings_chat_history:
             st.markdown(f'<div class="timestamp">{message["timestamp"]}</div>', unsafe_allow_html=True)
             bubble_class = "user-bubble" if message["role"] == "user" else "assistant-bubble"
             if "image_data" in message:
@@ -81,7 +81,7 @@ with col1:
                 image_data = uploaded_file.getvalue()
 
                 # 添加用户上传的图片到历史记录
-                st.session_state.chat_history.append({
+                st.session_state.paintings_chat_history.append({
                     "role": "user",
                     "content": "上传了一张图片",
                     "image_data": image_data,
@@ -111,7 +111,7 @@ with col1:
                     st.session_state.analysis_done = True
 
                     # 添加分析结果到对话
-                    st.session_state.chat_history.append({
+                    st.session_state.paintings_chat_history.append({
                         "role": "assistant",
                         "content": analysis_text + "\n\n现在你可以开始与这位画家对话了。",
                         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
@@ -124,7 +124,7 @@ with col1:
 
             if st.button("发送", use_container_width=True) and chat_input:
                 # 添加用户输入到历史记录
-                st.session_state.chat_history.append({
+                st.session_state.paintings_chat_history.append({
                     "role": "user",
                     "content": chat_input,
                     "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
@@ -135,7 +135,7 @@ with col1:
 
                 with st.spinner("思考中..."):
                     # 获取历史对话记录
-                    recent_history = st.session_state.chat_history[-10:]
+                    recent_history = st.session_state.paintings_chat_history[-10:]
                     messages = [{"role": "system", "content": artist_prompt}]
 
                     for msg in recent_history:
@@ -147,7 +147,7 @@ with col1:
                     artist_reply = call_openai(messages=messages, temperature=0.7)
 
                     # 添加画家回复到对话
-                    st.session_state.chat_history.append({
+                    st.session_state.paintings_chat_history.append({
                         "role": "assistant",
                         "content": artist_reply,
                         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
@@ -156,7 +156,7 @@ with col1:
                 st.rerun()
 
             if st.button("清除对话记录", use_container_width=True):
-                st.session_state.chat_history = [{
+                st.session_state.paintings_chat_history = [{
                     "role": "assistant",
                     "content": "你好！请上传一张图片，我会帮你分析画作风格并匹配相似的画家。",
                     "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
