@@ -8,12 +8,6 @@ st.set_page_config(page_title="文字分析与作家对话", layout="wide")
 
 st.markdown("""
 <style>
-    /* 移除默认的空白区域 */
-    .block-container {
-        padding-top: 1rem !important;
-        padding-bottom: 0rem !important;
-    }
-
     /* 移除标题下方的默认边距 */
     .stTitle {
         margin-bottom: 0 !important;
@@ -40,16 +34,6 @@ st.markdown("""
         clear: both;
     }
 
-    /* 聊天容器样式 */
-    .chat-container {
-        background-color: #F0F2F5;
-        padding: 20px;
-        border-radius: 10px;
-        margin-top: 1rem;
-        margin-bottom: 1rem;
-        height: calc(100vh - 280px);
-        overflow-y: auto;
-    }
 
     /* 时间戳样式 */
     .timestamp {
@@ -207,8 +191,11 @@ with col1:
                         2. 分析相似之处（包括主题、意象、语言特点等）
                         3. 生成这位作家的详细信息（生平、创作特点、代表作品）
                         请将回答分为两部分：
-                        第一部分：风格分析和相似度说明
-                        第二部分：作家信息（用[WRITER_INFO]标记开始）
+                        第一部分：
+                        风格分析和相似度说明
+                        第二部分：
+                        作家信息（用[WRITER_INFO]标记开始）
+                        说明作家的基本信息和在什么情况下和这段文字最匹配。
                         """
 
                         analysis_response = client.chat.completions.create(
