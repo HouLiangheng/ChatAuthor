@@ -1,11 +1,13 @@
 import streamlit as st
 from pages.toolbox.toolbox import call_openai, read_prompt
 import time
+from PIL import Image
+import io
 
 # 设置页面配置
-st.set_page_config(page_title="Painting Soul", layout="wide")
+st.set_page_config(page_title="图像分析与画家对话", layout="wide")
 
-# 在CSS样式部分修改如下内容
+# CSS和JS保持不变
 with open('pages/styles/main.css', 'r', encoding='utf-8') as css_file:
     css_content = css_file.read()
 
@@ -27,47 +29,30 @@ if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
     st.session_state.chat_history.append({
         "role": "assistant",
-        "content": "你好！上传你的画作或者照片，我会给你匹配最适合的艺术家。",
+        "content": "你好！请上传一张图片，我会帮你分析画作风格并匹配相似的画家。",
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
     })
 
-if "current_writer" not in st.session_state:
-    st.session_state.current_writer = None
+if "current_artist" not in st.session_state:
+    st.session_state.current_artist = None
 
-if "writer_info" not in st.session_state:
-    st.session_state.writer_info = None
+if "artist_info" not in st.session_state:
+    st.session_state.artist_info = None
 
 if "analysis_done" not in st.session_state:
     st.session_state.analysis_done = False
-
-if "text_input" not in st.session_state:
-    st.session_state.text_input = ""
-
-if "chat_input" not in st.session_state:
-    st.session_state.chat_input = ""
-
-
-def clear_text_input():
-    st.session_state.text_input = st.session_state.text
-    st.session_state.text = ""
-
-
-def clear_chat_input():
-    st.session_state.chat_input = st.session_state.chat
-    st.session_state.chat = ""
-
 
 # 创建两列布局
 col1, col2 = st.columns([7, 3])
 
 with col2:
-    # 如果已经有了作家信息，显示作家简介
-    if st.session_state.writer_info:
+    # 如果已经有了画家信息，显示画家简介
+    if st.session_state.artist_info:
         st.markdown("### 当前画家信息")
-        st.markdown(f'<div class="writer-info">{st.session_state.writer_info}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="writer-info">{st.session_state.artist_info}</div>', unsafe_allow_html=True)
 
 with col1:
-    st.title("文字分析与作家对话")
+    st.title("图像分析与画家对话")
 
     # 显示聊天历史
     chat_container = st.container()
@@ -76,99 +61,67 @@ with col1:
         for message in st.session_state.chat_history:
             st.markdown(f'<div class="timestamp">{message["timestamp"]}</div>', unsafe_allow_html=True)
             bubble_class = "user-bubble" if message["role"] == "user" else "assistant-bubble"
-            st.markdown(f'<div class="{bubble_class}">{message["content"]}</div>', unsafe_allow_html=True)
+            if "image_data" in message:
+                st.markdown(f'<div class="{bubble_class}">', unsafe_allow_html=True)
+                st.image(message["image_data"], width=300)
+                st.markdown('</div>', unsafe_allow_html=True)
+            else:
+                st.markdown(f'<div class="{bubble_class}">{message["content"]}</div>', unsafe_allow_html=True)
             st.markdown('<div class="clearfix"></div>', unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
     # 输入区域
     with st.container():
         if not st.session_state.analysis_done:
-            st.text_area("输入文字", key="text", height=100, on_change=clear_text_input)
-            text_input = st.session_state.text_input
+            uploaded_file = st.file_uploader("上传图片", type=['png', 'jpg', 'jpeg'])
             analyze_button = st.button("分析", use_container_width=True)
 
-            if text_input and analyze_button:
-                # 添加用户输入到历史记录
+            if uploaded_file and analyze_button:
+                # 读取图片数据
+                image_data = uploaded_file.getvalue()
+
+                # 添加用户上传的图片到历史记录
                 st.session_state.chat_history.append({
                     "role": "user",
-                    "content": text_input,
+                    "content": "上传了一张图片",
+                    "image_data": image_data,
                     "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
                 })
 
                 with st.spinner("分析中..."):
-                    # 步骤1：判断是否是已发表作品
-                    identification_prompt = read_prompt('pages/prompt/existing_writing.txt')
+                    # 分析图片风格和匹配画家
+                    analysis_prompt = read_prompt('pages/prompt/art_style.txt')  # 需要创建新的艺术风格分析提示
 
-                    identification_result = call_openai(
+                    # 这里需要使用支持图像分析的API
+                    analysis_result = call_openai(
                         messages=[
-                            {"role": "system", "content": identification_prompt},
-                            {"role": "user", "content": text_input}
-                        ]
+                            {"role": "system", "content": analysis_prompt},
+                            {"role": "user", "content": "分析这张图片的艺术风格"}
+                        ],
+                        image=image_data  # 需要修改API调用以支持图像输入
                     )
-                    if identification_result == "":
-                        # 让用户重新输入
-                        st.session_state.chat_history.append({
-                            "role": "assistant",
-                            "content": "你好！请输入你的文字或喜欢的句子，我会帮你分析风格并匹配相似的作家。",
-                            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
-                        })
-                    else:
-                        if "原创文字" in identification_result:
-                            # 步骤2：进行风格分析和作家匹配
-                            analysis_prompt = read_prompt('pages/prompt/writing_style.txt')
 
-                            analysis_result = call_openai(
-                                messages=[
-                                    {"role": "system", "content": analysis_prompt},
-                                    {"role": "user", "content": text_input}
-                                ]
-                            )
+                    # 分离画家信息和分析结果
+                    parts = analysis_result.split("[ARTIST_INFO]")
+                    analysis_text = parts[0].strip()
+                    artist_info = parts[1].strip() if len(parts) > 1 else ""
 
-                            # 分离作家信息和分析结果
-                            parts = analysis_result.split("[WRITER_INFO]")
-                            analysis_text = parts[0].strip()
-                            writer_info = parts[1].strip() if len(parts) > 1 else ""
+                    # 保存画家信息
+                    st.session_state.artist_info = artist_info
+                    st.session_state.analysis_done = True
 
-                            # 保存作家信息
-                            st.session_state.writer_info = writer_info
-                            st.session_state.analysis_done = True
-
-                            # 添加分析结果到对话
-                            st.session_state.chat_history.append({
-                                "role": "assistant",
-                                "content": analysis_text + "\n\n现在你可以开始与这位作家对话了。",
-                                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
-                            })
-                        else:
-                            analysis_prompt = read_prompt('pages/prompt/writer_info.txt')
-
-                            analysis_result = call_openai(
-                                messages=[
-                                    {"role": "system", "content": analysis_prompt},
-                                    {"role": "user", "content": text_input}
-                                ]
-                            )
-
-                            # 提取作家信息
-                            parts = analysis_result.split("[WRITER_INFO]")
-                            writer_info = parts[1].strip() if len(parts) > 1 else ""
-
-                            # 保存作家信息并设置分析完成状态
-                            st.session_state.writer_info = writer_info
-                            st.session_state.analysis_done = True
-
-                            # 添加分析结果到对话
-                            st.session_state.chat_history.append({
-                                "role": "assistant",
-                                "content": f"这是一段已发表的作品：\n\n{identification_result}\n\n现在你可以开始与这位作家对话了。",
-                                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
-                            })
+                    # 添加分析结果到对话
+                    st.session_state.chat_history.append({
+                        "role": "assistant",
+                        "content": analysis_text + "\n\n现在你可以开始与这位画家对话了。",
+                        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
+                    })
 
                 st.rerun()
         else:
-            # 与作家对话模式
-            st.text_input("与作家对话", key="chat", on_change=clear_chat_input)
-            chat_input = st.session_state.chat_input
+            # 与画家对话模式
+            chat_input = st.text_input("与画家对话", key="chat_input")
+
             if st.button("发送", use_container_width=True) and chat_input:
                 # 添加用户输入到历史记录
                 st.session_state.chat_history.append({
@@ -177,31 +130,26 @@ with col1:
                     "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
                 })
 
-                # 生成作家回复
-                # 在生成作家回复的部分，修改writer_prompt：
-                writer_prompt = read_prompt('pages/prompt/cosplay.txt')
+                # 生成画家回复
+                artist_prompt = read_prompt('pages/prompt/artist_cosplay.txt')  # 需要创建新的画家角色扮演提示
 
                 with st.spinner("思考中..."):
-                    # 获取历史对话记录（最近的5轮）用于上下文
+                    # 获取历史对话记录
                     recent_history = st.session_state.chat_history[-10:]
-                    messages = [{"role": "system", "content": writer_prompt}]
+                    messages = [{"role": "system", "content": artist_prompt}]
 
-                    # 添加历史对话作为上下文
                     for msg in recent_history:
                         if msg["role"] == "user":
                             messages.append({"role": "user", "content": msg["content"]})
                         elif msg["role"] == "assistant":
                             messages.append({"role": "assistant", "content": msg["content"]})
 
-                    # 添加当前问题
-                    messages.append({"role": "user", "content": chat_input})
+                    artist_reply = call_openai(messages=messages, temperature=0.7)
 
-                    writer_reply = call_openai(messages=messages, temperature=0.7)
-
-                    # 添加作家回复到对话
+                    # 添加画家回复到对话
                     st.session_state.chat_history.append({
                         "role": "assistant",
-                        "content": writer_reply,
+                        "content": artist_reply,
                         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
                     })
 
@@ -210,10 +158,10 @@ with col1:
             if st.button("清除对话记录", use_container_width=True):
                 st.session_state.chat_history = [{
                     "role": "assistant",
-                    "content": "你好！请输入你的文字或喜欢的句子，我会帮你分析风格并匹配相似的作家。",
+                    "content": "你好！请上传一张图片，我会帮你分析画作风格并匹配相似的画家。",
                     "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
                 }]
-                st.session_state.current_writer = None
-                st.session_state.writer_info = None
+                st.session_state.current_artist = None
+                st.session_state.artist_info = None
                 st.session_state.analysis_done = False
                 st.rerun()
