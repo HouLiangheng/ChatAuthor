@@ -1,5 +1,5 @@
 import streamlit as st
-from pages.toolbox import call_openai, read_prompt
+from pages.toolbox.toolbox import call_openai, read_prompt
 import time
 
 
@@ -41,34 +41,15 @@ if "writer_info" not in st.session_state:
 if "analysis_done" not in st.session_state:
     st.session_state.analysis_done = False
 
-
 # 创建两列布局
 col1, col2 = st.columns([7, 3])
 
 with col2:
-    # st.markdown("### 功能说明")
-    # st.markdown("""
-    # 1. 输入文字进行分析
-    # 2. 系统判断是否为已发表作品
-    # 3. 匹配相似作家风格
-    # 4. 与作家进行对话交流
-    # """)
-
     # 如果已经有了作家信息，显示作家简介
     if st.session_state.writer_info:
         st.markdown("### 当前作家信息")
         st.markdown(f'<div class="writer-info">{st.session_state.writer_info}</div>', unsafe_allow_html=True)
 
-    # if st.button("清除对话记录"):
-    #     st.session_state.chat_history = [{
-    #         "role": "assistant",
-    #         "content": "你好！请输入你的文字或喜欢的句子，我会帮你分析风格并匹配相似的作家。",
-    #         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
-    #     }]
-    #     st.session_state.current_writer = None
-    #     st.session_state.writer_info = None
-    #     st.session_state.analysis_done = False
-    #     st.rerun()
 
 with col1:
     st.title("文字分析与作家对话")
@@ -91,7 +72,6 @@ with col1:
             analyze_button = st.button("分析", use_container_width=True)
             
             if text_input and analyze_button:
-                st.session_state.text_input = ""
                 # 添加用户输入到历史记录
                 st.session_state.chat_history.append({
                     "role": "user",
@@ -174,7 +154,6 @@ with col1:
             chat_input = st.text_input("与作家对话", key="chat_input")
 
             if st.button("发送", use_container_width=True) and chat_input:
-                st.session_state.chat_input = ""
                 # 添加用户输入到历史记录
                 st.session_state.chat_history.append({
                     "role": "user",
