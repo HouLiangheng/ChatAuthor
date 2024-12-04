@@ -6,6 +6,7 @@ import time
 st.set_page_config(page_title="文字分析与作家对话", layout="wide")
 
 
+# 在CSS样式部分修改如下内容
 st.markdown("""
 <style>
     /* 移除标题下方的默认边距 */
@@ -24,20 +25,22 @@ st.markdown("""
         clear: both;
     }
 
+    /* 助手气泡样式适应深色模式 */
     .assistant-bubble {
-        background-color: white;
+        background-color: var(--background-color);
         padding: 10px 15px;
         border-radius: 15px;
         margin: 5px 0;
         max-width: 70%;
         float: left;
         clear: both;
+        border: 1px solid rgba(128, 128, 128, 0.2);
     }
 
-
-    /* 时间戳样式 */
+    /* 时间戳样式适应深色模式 */
     .timestamp {
-        color: #999;
+        color: var(--text-color);
+        opacity: 0.6;
         font-size: 12px;
         text-align: center;
         margin: 10px 0;
@@ -51,13 +54,14 @@ st.markdown("""
         content: "";
     }
 
-    /* 作家信息卡片样式 */
+    /* 作家信息卡片样式适应深色模式 */
     .writer-info {
-        background-color: #ffffff;
+        background-color: var(--background-color);
         padding: 15px;
         border-radius: 10px;
         margin-bottom: 15px;
         box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        border: 1px solid rgba(128, 128, 128, 0.2);
     }
 
     /* 输入区域样式 */
@@ -72,14 +76,41 @@ st.markdown("""
         color: white;
     }
 
-    /* 自定义功能说明区域样式 */
+    /* 自定义功能说明区域样式适应深色模式 */
     .function-desc {
-        background-color: #F7F7F7;
+        background-color: var(--background-color);
         padding: 15px;
         border-radius: 10px;
         margin-bottom: 15px;
+        border: 1px solid rgba(128, 128, 128, 0.2);
+    }
+
+    /* 设置深色模式下的CSS变量 */
+    [data-theme="dark"] {
+        --background-color: #2E2E2E;
+        --text-color: #FFFFFF;
+    }
+
+    /* 设置浅色模式下的CSS变量 */
+    [data-theme="light"] {
+        --background-color: #FFFFFF;
+        --text-color: #000000;
     }
 </style>
+
+<script>
+// 检测当前主题
+function updateTheme() {
+    const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+}
+
+// 初始化主题
+updateTheme();
+
+// 监听主题变化
+window.matchMedia('(prefers-color-scheme: dark)').addListener(updateTheme);
+</script>
 """, unsafe_allow_html=True)
 
 # 初始化会话状态
@@ -175,7 +206,7 @@ with col1:
                     """
 
                     identification_response = client.chat.completions.create(
-                        model="gpt-35-turbo",
+                        model="gpt-4o-2024-11-20",
                         messages=[
                             {"role": "system", "content": identification_prompt},
                             {"role": "user", "content": text_input}
@@ -190,16 +221,27 @@ with col1:
                         1. 找出最相似的作家（限定1位）
                         2. 分析相似之处（包括主题、意象、语言特点等）
                         3. 生成这位作家的详细信息（生平、创作特点、代表作品）
-                        请将回答分为两部分：
+                        请对输入的文字进行全面分析，按以下结构组织回答：
+                        
                         第一部分：
-                        风格分析和相似度说明
-                        第二部分：
-                        作家信息（用[WRITER_INFO]标记开始）
-                        说明作家的基本信息和在什么情况下和这段文字最匹配。
+                        请详细分析文字风格特点，包括：
+                        - 写作手法和语言特色
+                        - 情感表达方式
+                        - 主题意象特点
+                        - 最相似的作家（限定1位）及相似之处
+                        
+                        第二部分：[WRITER_INFO]
+                        关于这位作家：
+                        - 基本信息和主要成就
+                        - 创作特点和代表作品
+                        - 具体说明为什么这段文字与该作家风格相似
+                        - 举例说明最具代表性的对应特征
+                        
+                        请用自然流畅的语言表述，避免生硬的条目式陈述。
                         """
 
                         analysis_response = client.chat.completions.create(
-                            model="gpt-35-turbo",
+                            model="gpt-4o-2024-11-20",
                             messages=[
                                 {"role": "system", "content": analysis_prompt},
                                 {"role": "user", "content": text_input}
@@ -256,7 +298,7 @@ with col1:
 
                 with st.spinner("思考中..."):
                     writer_response = client.chat.completions.create(
-                        model="gpt-35-turbo",
+                        model="gpt-4o-2024-11-20",
                         messages=[
                             {"role": "system", "content": writer_prompt},
                             {"role": "user", "content": chat_input}
