@@ -28,5 +28,5 @@ def call_openai(messages, temperature=None):
 
         return response.choices[0].message.content
     except Exception as e:
-        st.error(f"Error calling OpenAI API: {e}")
+        print(e)
         return ""
