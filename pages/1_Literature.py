@@ -4,7 +4,7 @@ import time
 
 
 # 设置页面配置
-st.set_page_config(page_title="文字分析与作家对话", layout="wide")
+st.set_page_config(page_title="Literature Soul", layout="wide")
 
 # 在CSS样式部分修改如下内容
 with open('pages/styles/main.css', 'r', encoding='utf-8') as css_file:

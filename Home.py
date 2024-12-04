@@ -34,9 +34,8 @@ with col1:
         <div>
             <h2 style="color: #1f77b4;">📚 Literature</h2>
             <p style="font-size: 16px;">
-                输入文本进行风格分析<br>
-                了解文学作品的独特特点<br>
-                获取详细的写作风格报告
+                Match the writer who is most like you<br>
+                Talk to your favorite words
             </p >
         </div>
         <a href="Literature" target="_self" style="
@@ -70,9 +69,8 @@ with col2:
         <div>
             <h2 style="color: #ff7f0e;">🎨 Painting</h2>
             <p style="font-size: 16px;">
-                上传图片进行艺术分析<br>
-                探索绘画作品的风格特征<br>
-                获取专业的艺术评析
+                Match your art style<br>
+                Evaluate your artistry
             </p >
         </div>
         <a href="Paintings" target="_self" style="
