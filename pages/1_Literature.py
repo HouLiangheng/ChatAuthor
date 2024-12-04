@@ -45,29 +45,29 @@ if "analysis_done" not in st.session_state:
 col1, col2 = st.columns([7, 3])
 
 with col2:
-    st.markdown("### 功能说明")
-    st.markdown("""
-    1. 输入文字进行分析
-    2. 系统判断是否为已发表作品
-    3. 匹配相似作家风格
-    4. 与作家进行对话交流
-    """)
+    # st.markdown("### 功能说明")
+    # st.markdown("""
+    # 1. 输入文字进行分析
+    # 2. 系统判断是否为已发表作品
+    # 3. 匹配相似作家风格
+    # 4. 与作家进行对话交流
+    # """)
 
     # 如果已经有了作家信息，显示作家简介
     if st.session_state.writer_info:
         st.markdown("### 当前作家信息")
         st.markdown(f'<div class="writer-info">{st.session_state.writer_info}</div>', unsafe_allow_html=True)
 
-    if st.button("清除对话记录"):
-        st.session_state.chat_history = [{
-            "role": "assistant",
-            "content": "你好！请输入你的文字或喜欢的句子，我会帮你分析风格并匹配相似的作家。",
-            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
-        }]
-        st.session_state.current_writer = None
-        st.session_state.writer_info = None
-        st.session_state.analysis_done = False
-        st.rerun()
+    # if st.button("清除对话记录"):
+    #     st.session_state.chat_history = [{
+    #         "role": "assistant",
+    #         "content": "你好！请输入你的文字或喜欢的句子，我会帮你分析风格并匹配相似的作家。",
+    #         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
+    #     }]
+    #     st.session_state.current_writer = None
+    #     st.session_state.writer_info = None
+    #     st.session_state.analysis_done = False
+    #     st.rerun()
 
 with col1:
     st.title("文字分析与作家对话")
@@ -88,7 +88,7 @@ with col1:
         if not st.session_state.analysis_done:
             text_input = st.text_area("输入文字", key="text_input", height=100)
             analyze_button = st.button("分析", use_container_width=True)
-
+            
             if text_input and analyze_button:
                 # 添加用户输入到历史记录
                 st.session_state.chat_history.append({
@@ -107,62 +107,70 @@ with col1:
                             {"role": "user", "content": text_input}
                         ]
                     )
-                    if "原创文字" in identification_result:
-                        # 步骤2：进行风格分析和作家匹配
-                        analysis_prompt = read_prompt('pages/prompt/writing_style.txt')
-
-                        analysis_response = call_openai(
-                            messages=[
-                                {"role": "system", "content": analysis_prompt},
-                                {"role": "user", "content": text_input}
-                            ]
-                        )
-                        analysis_result = analysis_response.choices[0].message.content
-
-                        # 分离作家信息和分析结果
-                        parts = analysis_result.split("[WRITER_INFO]")
-                        analysis_text = parts[0].strip()
-                        writer_info = parts[1].strip() if len(parts) > 1 else ""
-
-                        # 保存作家信息
-                        st.session_state.writer_info = writer_info
-                        st.session_state.analysis_done = True
-
-                        # 添加分析结果到对话
+                    if identification_result == "":
+                        # 让用户重新输入
                         st.session_state.chat_history.append({
                             "role": "assistant",
-                            "content": analysis_text + "\n\n现在你可以开始与这位作家对话了。",
+                            "content": "你好！请输入你的文字或喜欢的句子，我会帮你分析风格并匹配相似的作家。",
                             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
                         })
                     else:
-                        analysis_prompt = read_prompt('pages/prompt/writer_info.txt')
-                        
-                        analysis_result = call_openai(
-                            messages=[
-                                {"role": "system", "content": analysis_prompt},
-                                {"role": "user", "content": text_input}
-                            ]
-                        )
+                        if "原创文字" in identification_result:
+                            # 步骤2：进行风格分析和作家匹配
+                            analysis_prompt = read_prompt('pages/prompt/writing_style.txt')
 
-                        # 提取作家信息
-                        parts = analysis_result.split("[WRITER_INFO]")
-                        writer_info = parts[1].strip() if len(parts) > 1 else ""
+                            analysis_result = call_openai(
+                                messages=[
+                                    {"role": "system", "content": analysis_prompt},
+                                    {"role": "user", "content": text_input}
+                                ]
+                            )
 
-                        # 保存作家信息并设置分析完成状态
-                        st.session_state.writer_info = writer_info
-                        st.session_state.analysis_done = True
+                            # 分离作家信息和分析结果
+                            parts = analysis_result.split("[WRITER_INFO]")
+                            analysis_text = parts[0].strip()
+                            writer_info = parts[1].strip() if len(parts) > 1 else ""
 
-                        # 添加分析结果到对话
-                        st.session_state.chat_history.append({
-                            "role": "assistant",
-                            "content": f"这是一段已发表的作品：\n\n{identification_result}\n\n现在你可以开始与这位作家对话了。",
-                            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
-                        })
+                            # 保存作家信息
+                            st.session_state.writer_info = writer_info
+                            st.session_state.analysis_done = True
+
+                            # 添加分析结果到对话
+                            st.session_state.chat_history.append({
+                                "role": "assistant",
+                                "content": analysis_text + "\n\n现在你可以开始与这位作家对话了。",
+                                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
+                            })
+                        else:
+                            analysis_prompt = read_prompt('pages/prompt/writer_info.txt')
+                            
+                            analysis_result = call_openai(
+                                messages=[
+                                    {"role": "system", "content": analysis_prompt},
+                                    {"role": "user", "content": text_input}
+                                ]
+                            )
+
+                            # 提取作家信息
+                            parts = analysis_result.split("[WRITER_INFO]")
+                            writer_info = parts[1].strip() if len(parts) > 1 else ""
+
+                            # 保存作家信息并设置分析完成状态
+                            st.session_state.writer_info = writer_info
+                            st.session_state.analysis_done = True
+
+                            # 添加分析结果到对话
+                            st.session_state.chat_history.append({
+                                "role": "assistant",
+                                "content": f"这是一段已发表的作品：\n\n{identification_result}\n\n现在你可以开始与这位作家对话了。",
+                                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
+                            })
 
                 st.rerun()
         else:
             # 与作家对话模式
             chat_input = st.text_input("与作家对话", key="chat_input")
+
             if st.button("发送", use_container_width=True) and chat_input:
                 # 添加用户输入到历史记录
                 st.session_state.chat_history.append({
@@ -199,4 +207,15 @@ with col1:
                         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
                     })
 
+                st.rerun()
+
+            if st.button("清除对话记录", use_container_width=True):
+                st.session_state.chat_history = [{
+                    "role": "assistant",
+                    "content": "你好！请输入你的文字或喜欢的句子，我会帮你分析风格并匹配相似的作家。",
+                    "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
+                }]
+                st.session_state.current_writer = None
+                st.session_state.writer_info = None
+                st.session_state.analysis_done = False
                 st.rerun()
