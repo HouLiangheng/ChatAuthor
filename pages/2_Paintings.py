@@ -93,20 +93,26 @@ with col1:
                     # 分析图片风格和匹配画家
                     analysis_prompt = read_prompt('pages/prompt/art_style.txt')  # 需要创建新的艺术风格分析提示
                     analysis_image = encode_image(uploaded_file)
-                    user_message = [
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": f"data:image/jpeg;base64,{analysis_image}"
+
+                    user_message = [{
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": analysis_prompt
+                            },
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": f"data:image/jpeg;base64,{analysis_image}"
+                                }
                             }
-                        }
-                    ]
+                        ]
+                    }]
+                                        
                     # 这里需要使用支持图像分析的API
                     analysis_result = call_openai(
-                        messages=[
-                            {"role": "system", "content": analysis_prompt},
-                            {"role": "user", "content": user_message}
-                        ]
+                        messages=user_message
                     )
 
                     # 分离画家信息和分析结果
