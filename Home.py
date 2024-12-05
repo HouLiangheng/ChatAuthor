@@ -47,7 +47,7 @@ with col1:
             border-radius: 5px;
             margin-top: 20px;
             font-weight: bold;">
-            开始分析
+            Start
         </a >
     </div>
     """, unsafe_allow_html=True)
@@ -82,7 +82,7 @@ with col2:
             border-radius: 5px;
             margin-top: 20px;
             font-weight: bold;">
-            开始分析
+            Start
         </a >
     </div>
     """, unsafe_allow_html=True)
