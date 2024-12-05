@@ -53,7 +53,7 @@ with col2:
         st.markdown(f'<div class="writer-info">{st.session_state.artist_info}</div>', unsafe_allow_html=True)
 
 with col1:
-    st.title("图像分析与画家对话")
+    st.title("画境之思 | Visual Insights")
 
     # 显示聊天历史
     chat_container = st.container()
