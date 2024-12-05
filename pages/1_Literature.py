@@ -87,7 +87,7 @@ with col1:
                     st.markdown(
                         f'''
                     <div class="assistant-bubble-container">
-                        <img src="data:image/jpeg;base64,{st.session_state.image}" class="writer-avatar" onerror="this.src='https://via.placeholder.com/40'"/>
+                        <img src="data:image/jpeg;base64,{st.session_state.image}" class="writer-avatar"/>
                         <div class="assistant-bubble">{message["content"]}</div>
                     </div>
                     ''', 
@@ -238,4 +238,5 @@ with col1:
                 st.session_state.current_writer = None
                 st.session_state.writer_info = None
                 st.session_state.writer_analysis_done = False
+                st.session_state.image = None
                 st.rerun()

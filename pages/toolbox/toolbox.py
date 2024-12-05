@@ -205,6 +205,9 @@ def generate_icon(writer):
             if status not in ['running', 'queued']:
                 break
         image = process_and_save_image(data)
-        return image
+        buffered = BytesIO()
+        image.save(buffered, format="JPEG")
+        img_str = base64.b64encode(buffered.getvalue()).decode()
+        return img_str
     else:
         return None

@@ -1,5 +1,5 @@
 import streamlit as st
-from pages.toolbox.toolbox import call_openai, read_prompt, encode_image
+from pages.toolbox.toolbox import call_openai, read_prompt, encode_image, generate_icon
 import time
 from PIL import Image
 import io
@@ -43,6 +43,9 @@ if "artist_info" not in st.session_state:
 if "artist_analysis_done" not in st.session_state:
     st.session_state.artist_analysis_done = False
 
+if "writer_icon" not in st.session_state:
+    st.session_state.writer_icon = None
+
 # 创建两列布局
 col1, col2 = st.columns([7, 3])
 
@@ -61,19 +64,50 @@ with col1:
         st.markdown('<div class="chat-container">', unsafe_allow_html=True)
         for message in st.session_state.paintings_chat_history:
             st.markdown(f'<div class="timestamp">{message["timestamp"]}</div>', unsafe_allow_html=True)
-            bubble_class = "user-bubble" if message["role"] == "user" else "assistant-bubble"
-            
-            if "image_data" in message:
-                # Convert bytes to base64 if needed
-                if isinstance(message["image_data"], bytes):
-                    image_base64 = base64.b64encode(message["image_data"]).decode('utf-8')
+            # bubble_class = "user-bubble" if message["role"] == "user" else "assistant-bubble"
+            if message["role"] == "user":
+                if "image_data" in message:
+                    # Convert bytes to base64 if needed
+                    if isinstance(message["image_data"], bytes):
+                        image_base64 = base64.b64encode(message["image_data"]).decode('utf-8')
+                    else:
+                        image_base64 = message["image_data"]
+                    # Create img tag with proper styling to fit in bubble
+                    img_html = f'<div class="user-bubble"><img src="data:image/jpeg;base64,{image_base64}" style="max-width:100%; border-radius:10px;"/></div>'
+                    st.markdown(img_html, unsafe_allow_html=True)
                 else:
-                    image_base64 = message["image_data"]
-                # Create img tag with proper styling to fit in bubble
-                img_html = f'<div class="{bubble_class}"><img src="data:image/jpeg;base64,{image_base64}" style="max-width:100%; border-radius:10px;"/></div>'
-                st.markdown(img_html, unsafe_allow_html=True)
+                    st.markdown(f'<div class="user-bubble">{message["content"]}</div>', unsafe_allow_html=True)
             else:
-                st.markdown(f'<div class="{bubble_class}">{message["content"]}</div>', unsafe_allow_html=True)
+                if "image_data" in message:
+                    # Handle assistant images
+                    image_base64 = base64.b64encode(message["image_data"]).decode('utf-8') if isinstance(message["image_data"], bytes) else message["image_data"]
+                    if st.session_state.writer_icon:
+                        st.markdown(
+                            f'''
+                            <div class="assistant-bubble-container">
+                                <img src="data:image/jpeg;base64,{st.session_state.writer_icon}" class="writer-avatar"/>
+                                <div class="assistant-bubble">
+                                    <img src="data:image/jpeg;base64,{image_base64}" style="max-width:100%; border-radius:10px;"/>
+                                </div>
+                            </div>
+                            ''', 
+                            unsafe_allow_html=True
+                        )
+                    else:
+                        st.markdown(f'<div class="assistant-bubble"><img src="data:image/jpeg;base64,{image_base64}" style="max-width:100%; border-radius:10px;"/></div>', unsafe_allow_html=True)
+                else:
+                    if st.session_state.writer_icon:
+                        st.markdown(
+                            f'''
+                            <div class="assistant-bubble-container">
+                                <img src="data:image/jpeg;base64,{st.session_state.writer_icon}" class="writer-avatar"/>
+                                <div class="assistant-bubble">{message["content"]}</div>
+                            </div>
+                            ''', 
+                            unsafe_allow_html=True
+                        )
+                    else:
+                        st.markdown(f'<div class="assistant-bubble">{message["content"]}</div>', unsafe_allow_html=True)
             
             st.markdown('<div class="clearfix"></div>', unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
@@ -141,6 +175,8 @@ with col1:
                 st.rerun()
         else:
             # 与画家对话模式
+            if st.session_state.writer_icon is None:
+                st.session_state.writer_icon = generate_icon(st.session_state.artist_info)
             chat_input = st.text_input("与画家对话", key="chat_input")
 
             if st.button("发送", use_container_width=True) and chat_input:
@@ -185,4 +221,5 @@ with col1:
                 st.session_state.current_artist = None
                 st.session_state.artist_info = None
                 st.session_state.artist_analysis_done = False
+                st.session_state.writer_icon = None
                 st.rerun()
