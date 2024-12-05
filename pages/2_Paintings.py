@@ -1,8 +1,9 @@
 import streamlit as st
-from pages.toolbox.toolbox import call_openai, read_prompt
+from pages.toolbox.toolbox import call_openai, read_prompt, encode_image
 import time
 from PIL import Image
 import io
+import base64
 
 # 设置页面配置
 st.set_page_config(page_title="图像分析与画家对话", layout="wide")
@@ -91,14 +92,21 @@ with col1:
                 with st.spinner("分析中..."):
                     # 分析图片风格和匹配画家
                     analysis_prompt = read_prompt('pages/prompt/art_style.txt')  # 需要创建新的艺术风格分析提示
-
+                    analysis_image = encode_image(uploaded_file)
+                    user_message = [
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:image/jpeg;base64,{analysis_image}"
+                            }
+                        }
+                    ]
                     # 这里需要使用支持图像分析的API
                     analysis_result = call_openai(
                         messages=[
                             {"role": "system", "content": analysis_prompt},
-                            {"role": "user", "content": "分析这张图片的艺术风格"}
-                        ],
-                        image = image_data  # 需要修改API调用以支持图像输入
+                            {"role": "user", "content": user_message}
+                        ]
                     )
 
                     # 分离画家信息和分析结果
