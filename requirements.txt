@@ -8,6 +8,7 @@ markupsafe==3.0.2
 numpy==2.1.2
 pyarrow==17.0.0
 tornado==6.4.1
+replicate==1.0.4
 openai==1.56.1
 attrs==24.2.0
 blinker==1.8.2
