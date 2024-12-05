@@ -9,7 +9,7 @@ st.set_page_config(
 )
 
 # 页面标题和介绍
-st.title("🎨 Find Your ArtSoul")
+st.title("ChatWriter - Find Your ArtSoul")
 
 # 添加一些页面间距
 st.markdown("<br>", unsafe_allow_html=True)
