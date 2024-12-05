@@ -28,7 +28,7 @@ if "literature_chat_history" not in st.session_state:
     st.session_state.literature_chat_history = []
     st.session_state.literature_chat_history.append({
         "role": "assistant",
-        "content": "你好！请输入你的文字或喜欢的句子，我会帮你分析风格并匹配相似的作家。",
+        "content": "你好！请输入你的文字或喜欢的句子，我会帮你分析风格并匹配相似的作家<br>Hello! Please enter your text or favorite sentence and I'll help you analyze the style and match similar writers!",
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
     })
 
@@ -210,7 +210,7 @@ with col1:
             if st.button("清除对话记录", use_container_width=True):
                 st.session_state.literature_chat_history = [{
                     "role": "assistant",
-                    "content": "你好！请输入你的文字或喜欢的句子，我会帮你分析风格并匹配相似的作家。<br>Hello! Please enter your text or favorite sentence and I'll help you analyze the style and match similar writers!",
+                    "content": "你好！请输入你的文字或喜欢的句子，我会帮你分析风格并匹配相似的作家<br>Hello! Please enter your text or favorite sentence and I'll help you analyze the style and match similar writers!",
                     "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
                 }]
                 st.session_state.current_writer = None
