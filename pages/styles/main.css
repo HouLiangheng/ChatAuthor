@@ -26,6 +26,17 @@
     border: 1px solid rgba(128, 128, 128, 0.2);
 }
 
+.user-bubble img, .assistant-bubble img {
+    max-width: 100%;
+    border-radius: 10px;
+    display: block;
+    margin: 0 auto;
+}
+
+.user-bubble p, .assistant-bubble p {
+    margin: 5px 0;
+}
+
 /* 时间戳样式适应深色模式 */
 .timestamp {
     color: var(--text-color);

@@ -38,8 +38,8 @@ if "current_writer" not in st.session_state:
 if "writer_info" not in st.session_state:
     st.session_state.writer_info = None
 
-if "analysis_done" not in st.session_state:
-    st.session_state.analysis_done = False
+if "writer_analysis_done" not in st.session_state:
+    st.session_state.writer_analysis_done = False
 
 if "text_input" not in st.session_state:
     st.session_state.text_input = ""
@@ -81,7 +81,7 @@ with col1:
 
     # 输入区域
     with st.container():
-        if not st.session_state.analysis_done:
+        if not st.session_state.writer_analysis_done:
             st.text_area("输入文字", key="text", height=100, on_change=clear_text_input)
             text_input = st.session_state.text_input
             analyze_button = st.button("分析", use_container_width=True)
@@ -131,7 +131,7 @@ with col1:
 
                             # 保存作家信息
                             st.session_state.writer_info = writer_info
-                            st.session_state.analysis_done = True
+                            st.session_state.writer_analysis_done = True
 
                             # 添加分析结果到对话
                             st.session_state.literature_chat_history.append({
@@ -155,7 +155,7 @@ with col1:
 
                             # 保存作家信息并设置分析完成状态
                             st.session_state.writer_info = writer_info
-                            st.session_state.analysis_done = True
+                            st.session_state.writer_analysis_done = True
 
                             # 添加分析结果到对话
                             st.session_state.literature_chat_history.append({
@@ -215,5 +215,5 @@ with col1:
                 }]
                 st.session_state.current_writer = None
                 st.session_state.writer_info = None
-                st.session_state.analysis_done = False
+                st.session_state.writer_analysis_done = False
                 st.rerun()

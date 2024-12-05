@@ -40,8 +40,8 @@ if "current_artist" not in st.session_state:
 if "artist_info" not in st.session_state:
     st.session_state.artist_info = None
 
-if "analysis_done" not in st.session_state:
-    st.session_state.analysis_done = False
+if "artist_analysis_done" not in st.session_state:
+    st.session_state.artist_analysis_done = False
 
 # 创建两列布局
 col1, col2 = st.columns([7, 3])
@@ -62,18 +62,25 @@ with col1:
         for message in st.session_state.paintings_chat_history:
             st.markdown(f'<div class="timestamp">{message["timestamp"]}</div>', unsafe_allow_html=True)
             bubble_class = "user-bubble" if message["role"] == "user" else "assistant-bubble"
+            
             if "image_data" in message:
-                st.markdown(f'<div class="{bubble_class}">', unsafe_allow_html=True)
-                st.image(message["image_data"], width=300)
-                st.markdown('</div>', unsafe_allow_html=True)
+                # Convert bytes to base64 if needed
+                if isinstance(message["image_data"], bytes):
+                    image_base64 = base64.b64encode(message["image_data"]).decode('utf-8')
+                else:
+                    image_base64 = message["image_data"]
+                # Create img tag with proper styling to fit in bubble
+                img_html = f'<div class="{bubble_class}"><img src="data:image/jpeg;base64,{image_base64}" style="max-width:100%; border-radius:10px;"/></div>'
+                st.markdown(img_html, unsafe_allow_html=True)
             else:
                 st.markdown(f'<div class="{bubble_class}">{message["content"]}</div>', unsafe_allow_html=True)
+            
             st.markdown('<div class="clearfix"></div>', unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
     # 输入区域
     with st.container():
-        if not st.session_state.analysis_done:
+        if not st.session_state.artist_analysis_done:
             uploaded_file = st.file_uploader("上传图片", type=['png', 'jpg', 'jpeg'])
             analyze_button = st.button("分析", use_container_width=True)
 
@@ -122,7 +129,7 @@ with col1:
 
                     # 保存画家信息
                     st.session_state.artist_info = artist_info
-                    st.session_state.analysis_done = True
+                    st.session_state.artist_analysis_done = True
 
                     # 添加分析结果到对话
                     st.session_state.paintings_chat_history.append({
@@ -177,5 +184,5 @@ with col1:
                 }]
                 st.session_state.current_artist = None
                 st.session_state.artist_info = None
-                st.session_state.analysis_done = False
+                st.session_state.artist_analysis_done = False
                 st.rerun()
