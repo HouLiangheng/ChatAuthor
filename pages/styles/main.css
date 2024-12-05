@@ -26,6 +26,21 @@
     border: 1px solid rgba(128, 128, 128, 0.2);
 }
 
+.assistant-bubble-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    max-width: 80%;
+    float: left;
+    clear: both;
+}
+
+.writer-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
 .user-bubble img, .assistant-bubble img {
     max-width: 100%;
     border-radius: 10px;

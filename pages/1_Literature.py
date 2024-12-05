@@ -1,5 +1,5 @@
 import streamlit as st
-from pages.toolbox.toolbox import call_openai, read_prompt
+from pages.toolbox.toolbox import call_openai, read_prompt, generate_icon
 import time
 
 
@@ -47,6 +47,9 @@ if "text_input" not in st.session_state:
 if "chat_input" not in st.session_state:
     st.session_state.chat_input = ""
 
+if "image" not in st.session_state:
+    st.session_state.image = None
+
 def clear_text_input():
     st.session_state.text_input = st.session_state.text
     st.session_state.text = ""
@@ -74,8 +77,25 @@ with col1:
         st.markdown('<div class="chat-container">', unsafe_allow_html=True)
         for message in st.session_state.literature_chat_history:
             st.markdown(f'<div class="timestamp">{message["timestamp"]}</div>', unsafe_allow_html=True)
-            bubble_class = "user-bubble" if message["role"] == "user" else "assistant-bubble"
-            st.markdown(f'<div class="{bubble_class}">{message["content"]}</div>', unsafe_allow_html=True)
+
+            # bubble_class = "user-bubble" if message["role"] == "user" else "assistant-bubble"
+            # st.markdown(f'<div class="{bubble_class}">{message["content"]}</div>', unsafe_allow_html=True)
+            if message["role"] == "user":
+                st.markdown(f'<div class="user-bubble">{message["content"]}</div>', unsafe_allow_html=True)
+            else:
+                if st.session_state.image is not None:
+                    st.markdown(
+                        f'''
+                    <div class="assistant-bubble-container">
+                        <img src="data:image/jpeg;base64,{st.session_state.image}" class="writer-avatar" onerror="this.src='https://via.placeholder.com/40'"/>
+                        <div class="assistant-bubble">{message["content"]}</div>
+                    </div>
+                    ''', 
+                        unsafe_allow_html=True
+                    )
+                else:
+                    st.markdown(f'<div class="assistant-bubble">{message["content"]}</div>', unsafe_allow_html=True)
+                    
             st.markdown('<div class="clearfix"></div>', unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
@@ -167,6 +187,8 @@ with col1:
                 st.rerun()
         else:
             # 与作家对话模式
+            if st.session_state.image is None:
+                st.session_state.image = generate_icon(st.session_state.writer_info)
             st.text_input("与作家对话", key="chat", on_change=clear_chat_input)
             chat_input = st.session_state.chat_input
             if st.button("发送", use_container_width=True) and chat_input:

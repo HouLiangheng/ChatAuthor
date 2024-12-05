@@ -4,7 +4,7 @@ import os
 from PIL import Image
 import requests
 from io import BytesIO
-from pages.toolbox.toolbox import call_openai, read_prompt, encode_image, call_tripo3d, get_tripo3d_result
+from pages.toolbox.toolbox import call_openai, read_prompt, encode_image, call_tripo3d, get_tripo3d_result, process_and_save_image, get_tripo3d_result_polling
 import json
 import ast
 import asyncio
@@ -34,8 +34,6 @@ def get_character_description(name):
 
     messages = [{"role": "user", "content": prompt}]
     response = call_openai(messages)
-    print(response)
-    print(type(response))
     response = response.strip()  # Remove leading/trailing whitespace
     response = response.replace("```json", "").replace("```", "")  # Remove markdown code blocks
     
@@ -68,31 +66,7 @@ def build_prompt(char_info):
     return prompt
 
 
-def generate_image(prompt, model_version, steps, scale, negative_prompt):
-    """使用Stable Diffusion生成图像"""
-    try:
-        if model_version == "stable-diffusion-v1-5":
-            model = "stability-ai/stable-diffusion:ac732df83cea7fff18b8472768c88ad041fa750ff7682a21affe81863cbe77e4"
-        else:
-            model = "stability-ai/sdxl:39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b"
 
-        output = replicate.run(
-            model,
-            input={
-                "prompt": prompt,
-                "negative_prompt": negative_prompt,
-                "num_inference_steps": steps,
-                "guidance_scale": scale,
-            }
-        )
-
-        if output and len(output) > 0:
-            response = requests.get(output[0])
-            return Image.open(BytesIO(response.content))
-        return None
-    except Exception as e:
-        st.error(f"图像生成错误: {str(e)}")
-        return None
 
 
 # # 侧边栏设置
@@ -133,22 +107,36 @@ if st.button("生成肖像"):
 
             with st.expander("查看生成提示词"):
                 st.write(prompt)
-
+            count = 0
+            image = None
             with st.spinner("正在生成肖像..."):
-                # image = generate_image(
-                #     prompt,
-                #     model_version,
-                #     steps,
-                #     scale,
-                #     negative_prompt
-                # )
                 response = call_tripo3d(prompt)
-                image = asyncio.run(get_tripo3d_result(response['data']['task_id']))
-            if image:
+                while True:
+                    count += 1
+                    result = get_tripo3d_result_polling(response['data']['task_id'])
+                    print(result)
+                    print(type(result))
+                    print(count)
+
+                    if isinstance(result, dict):
+                        data = result
+                    else:
+                        try:
+                            data = json.loads(result)
+                        except json.JSONDecodeError:
+                            print("Received non-JSON message:", result)
+                            break
+                    
+                    status = data['data']['status']
+                    print(status)
+                    if status not in ['running', 'queued']:
+                        break
+                image = process_and_save_image(data)
+            if image != False:
                 col1, col2 = st.columns([2, 1])
 
                 with col1:
-                    st.write(image, use_column_width=True)
+                    st.image(image, use_column_width=True)
 
                 with col2:
                     st.subheader("人物信息")
