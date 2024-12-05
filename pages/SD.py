@@ -4,9 +4,10 @@ import os
 from PIL import Image
 import requests
 from io import BytesIO
-from pages.toolbox.toolbox import call_openai, read_prompt, encode_image
+from pages.toolbox.toolbox import call_openai, read_prompt, encode_image, call_tripo3d, get_tripo3d_result
 import json
 import ast
+import asyncio
 
 # 设置页面配置
 st.set_page_config(page_title="AI 历史人物肖像生成", layout="wide")
@@ -33,18 +34,22 @@ def get_character_description(name):
 
     messages = [{"role": "user", "content": prompt}]
     response = call_openai(messages)
-    # Clean up the response by removing any markdown formatting
-    response = str(response).strip()
-    if response.startswith(''): response = response.split('\n', 1)[1] # Remove the first line if it contains
-    if response.endswith(''): response = response.rsplit('\n', 1)[0] # Remove the last line if it contains
+    print(response)
+    print(type(response))
+    response = response.strip()  # Remove leading/trailing whitespace
+    response = response.replace("```json", "").replace("```", "")  # Remove markdown code blocks
+    
     try:
         # First try to parse as JSON
         return json.loads(response)
-    except json.JSONDecodeError:
+    except json.JSONDecodeError as e:
         try:
-            # If JSON parsing fails, try literal_eval
-            return ast.literal_eval(response)
-        except (SyntaxError, ValueError):
+            print(f"JSON parsing failed: {e}")
+            # If JSON parsing fails, try cleaning the string further
+            response = response.replace("'", '"')  # Replace single quotes with double quotes
+            return json.loads(response)
+        except Exception as e:
+            print(f"All parsing attempts failed: {e}")
             print("无法解析GPT API的返回内容")
             return {}
 
@@ -90,25 +95,25 @@ def generate_image(prompt, model_version, steps, scale, negative_prompt):
         return None
 
 
-# 侧边栏设置
-with st.sidebar:
-    st.header("生成设置")
+# # 侧边栏设置
+# with st.sidebar:
+#     st.header("生成设置")
 
-    model_version = st.selectbox(
-        "模型版本",
-        ["stable-diffusion-xl", "stable-diffusion-v1-5"]
-    )
+#     model_version = st.selectbox(
+#         "模型版本",
+#         ["stable-diffusion-xl", "stable-diffusion-v1-5"]
+#     )
 
-    with st.expander("高级设置"):
-        steps = st.slider("推理步数", 20, 100, 50)
-        scale = st.slider("引导比例", 1.0, 20.0, 7.5)
-        negative_prompt = st.text_area(
-            "反向提示词",
-            "lowres, bad anatomy, bad hands, text, error, missing fingers, " +
-            "extra digit, fewer digits, cropped, worst quality, low quality, " +
-            "normal quality, jpeg artifacts, signature, watermark, username, blurry, " +
-            "wrong gender, wrong age, deformed face"
-        )
+#     with st.expander("高级设置"):
+#         steps = st.slider("推理步数", 20, 100, 50)
+#         scale = st.slider("引导比例", 1.0, 20.0, 7.5)
+#         negative_prompt = st.text_area(
+#             "反向提示词",
+#             "lowres, bad anatomy, bad hands, text, error, missing fingers, " +
+#             "extra digit, fewer digits, cropped, worst quality, low quality, " +
+#             "normal quality, jpeg artifacts, signature, watermark, username, blurry, " +
+#             "wrong gender, wrong age, deformed face"
+#         )
 
 # 主界面
 name = st.text_input("输入历史人物名称", placeholder="例如：李白")
@@ -130,19 +135,20 @@ if st.button("生成肖像"):
                 st.write(prompt)
 
             with st.spinner("正在生成肖像..."):
-                image = generate_image(
-                    prompt,
-                    model_version,
-                    steps,
-                    scale,
-                    negative_prompt
-                )
-
+                # image = generate_image(
+                #     prompt,
+                #     model_version,
+                #     steps,
+                #     scale,
+                #     negative_prompt
+                # )
+                response = call_tripo3d(prompt)
+                image = asyncio.run(get_tripo3d_result(response['data']['task_id']))
             if image:
                 col1, col2 = st.columns([2, 1])
 
                 with col1:
-                    st.image(image, use_column_width=True)
+                    st.write(image, use_column_width=True)
 
                 with col2:
                     st.subheader("人物信息")
