@@ -66,7 +66,7 @@ with col2:
 
 
 with col1:
-    st.title("文字分析与作家对话")
+    st.title("文思漫谈 | Literary Musings")
 
     # 显示聊天历史
     chat_container = st.container()

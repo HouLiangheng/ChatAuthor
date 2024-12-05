@@ -6,7 +6,7 @@ import io
 import base64
 
 # 设置页面配置
-st.set_page_config(page_title="图像分析与画家对话", layout="wide")
+st.set_page_config(page_title="画境之思 | Visual Insights", layout="wide")
 
 # CSS和JS保持不变
 with open('pages/styles/main.css', 'r', encoding='utf-8') as css_file:
