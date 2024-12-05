@@ -29,7 +29,7 @@ if "paintings_chat_history" not in st.session_state:
     st.session_state.paintings_chat_history = []
     st.session_state.paintings_chat_history.append({
         "role": "assistant",
-        "content": "你好！请上传一张图片，我会帮你分析画作风格并匹配相似的画家。<br>Hello! Please upload an image and I will help you analyze the style of the painting and match it with similar painters.",
+        "content": "你好！请上传一张图片，我会帮你分析画作风格并匹配相似的画家<br>Hello! Please upload an image and I will help you analyze the style of the painting and match it with similar painters.",
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
     })
 
@@ -158,7 +158,7 @@ with col1:
             if st.button("清除对话记录", use_container_width=True):
                 st.session_state.paintings_chat_history = [{
                     "role": "assistant",
-                    "content": "你好！请上传一张图片，我会帮你分析画作风格并匹配相似的画家。<br>Hello! Please upload an image and I will help you analyze the style of the painting and match it with similar painters.",
+                    "content": "你好！请上传一张图片，我会帮你分析画作风格并匹配相似的画家<br>Hello! Please upload an image and I will help you analyze the style of the painting and match it with similar painters.",
                     "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
                 }]
                 st.session_state.current_artist = None
